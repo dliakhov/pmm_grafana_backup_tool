@@ -5,3 +5,5 @@
 *.o
 
 dashboards/
+
+.DS_Store
