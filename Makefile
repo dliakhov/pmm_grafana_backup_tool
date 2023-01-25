@@ -1,6 +1,8 @@
-	.PHONY : build run fresh test clean
+.PHONY : build clean dist fresh run_backup run_restore test docker_build docker_run_backup
 
 BIN := pmm_grafana_backup_tool
+GRAFANA_TOKEN ?=
+GRAFANA_URL ?=
 
 build:
 	go build -o ${BIN} -ldflags="-s -w"
@@ -14,17 +16,13 @@ dist:
 
 fresh: clean build run
 
-lint:
-	gofmt -s -w .
-	find . -name "*.go" -exec ${GOPATH}/bin/golint {} \;
-
 run_backup:
 	./${BIN} backup
 
 run_restore:
-	./${BIN} backup
+	./${BIN} restore
 
-test: lint
+test:
 	go test
 
 docker_build:
@@ -32,7 +30,7 @@ docker_build:
 
 docker_run_backup:
 	docker run --rm --name pmm_grafana_backup_tool \
-                   -e GRAFANA_TOKEN=eyJrIjoiS043WW9ubzg4Nnl5TkJlcE5jZFZDek8xUnBacWhmeTciLCJuIjoiYWRtaW4iLCJpZCI6MX0= \
-                   -e GRAFANA_URL=http://host.docker.internal/graph/api/ \
+                   -e GRAFANA_TOKEN=${GRAFANA_TOKEN} \
+                   -e GRAFANA_URL=${GRAFANA_URL} \
                    -v /Users/dmytro.liakhov/dev/percona/pmm_grafana_backup/pmm_grafana_backup_tool/dashboards_docker:/opt/pmm_grafana_backup_tool/_OUTPUT_  \
                    $(docker build -q .)
